@@ -1,43 +1,41 @@
 package com.example.kittypatty;
 
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import cn.pedant.SweetAlert.SweetAlertDialog;
+import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
-
+    String prevStarted = "appStart";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
+        SharedPreferences sharedpreferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        finish();
-        System.exit(0);
-    }
+        Boolean isStarted = sharedpreferences.getBoolean(prevStarted, false);
 
-    @Override
-    public void onBackPressed() {
-        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE).setTitleText("Are you sure to exit?").setContentText("Press Exit To Close App").setCancelText("Cancel").setConfirmText("Exit").showCancelButton(true).setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {@Override
-        public void onClick(SweetAlertDialog sDialog) {
-            sDialog.setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                @Override
-                public void onClick(SweetAlertDialog sDialog) {
-                    sDialog.cancel();
-                }
-            });
-            sDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                @Override
-                public void onClick(SweetAlertDialog sDialog) {
-                    onDestroy();
-                }
-            });
+
+        if(!isStarted) {
+            SharedPreferences.Editor editor = sharedpreferences.edit();
+            editor.putBoolean(prevStarted, Boolean.TRUE);
+            editor.apply();
+            Intent intent = new Intent(MainActivity.this, SplashScreenActivity.class);
+            startActivity(intent);
+        } else {
+            setContentView(R.layout.activity_main);
         }
-        }).show();
+    }
+    @Override
+    public void onBackPressed(){
+        moveTaskToBack(false);
+        SharedPreferences sharedpreferences = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putBoolean(prevStarted, Boolean.FALSE);
+        editor.apply();
+        finishAffinity();
     }
 }
